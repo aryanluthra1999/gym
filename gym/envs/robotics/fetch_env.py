@@ -13,9 +13,9 @@ class FetchEnv(robot_env.RobotEnv):
     """
 
     def __init__(
-        self, model_path, n_substeps, gripper_extra_height, block_gripper,
-        has_object, target_in_the_air, target_offset, obj_range, target_range,
-        distance_threshold, initial_qpos, reward_type,
+            self, model_path, n_substeps, gripper_extra_height, block_gripper,
+            has_object, target_in_the_air, target_offset, obj_range, target_range,
+            distance_threshold, initial_qpos, reward_type,
     ):
         """Initializes a new Fetch environment.
 
@@ -136,14 +136,37 @@ class FetchEnv(robot_env.RobotEnv):
         self.sim.model.site_pos[site_id] = self.goal - sites_offset[0]
         self.sim.forward()
 
+    def tweakParams(self, **kwargs):
+        to_tweak = dict(kwargs)
+        if 'gripper_extra_height' in to_tweak:
+            self.gripper_extra_height = to_tweak['gripper_extra_height']
+        if 'block_gripper' in to_tweak:
+            self.block_gripper = to_tweak['block_gripper']
+        if 'has_object' in to_tweak:
+            self.has_object = to_tweak['has_object']
+        if 'target_in_the_air' in to_tweak:
+            print("it worked")
+            print(to_tweak)
+            self.target_in_the_air = to_tweak['target_in_the_air']
+        if 'target_offset' in to_tweak:
+            self.target_offset = to_tweak['target_offset']
+        if 'obj_range' in to_tweak:
+            self.obj_range = to_tweak['obj_range']
+        if 'target_range' in to_tweak:
+            self.target_range = to_tweak['target_range']
+        if 'distance_threshold' in to_tweak:
+            self.distance_threshold = to_tweak['distance_threshold']
+
     def _reset_sim(self):
+        print(self.target_in_the_air)
         self.sim.set_state(self.initial_state)
 
         # Randomize start position of object.
         if self.has_object:
             object_xpos = self.initial_gripper_xpos[:2]
             while np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2]) < 0.1:
-                object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
+                object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range,
+                                                                                     size=2)
             object_qpos = self.sim.data.get_joint_qpos('object0:joint')
             assert object_qpos.shape == (7,)
             object_qpos[:2] = object_xpos
@@ -157,10 +180,14 @@ class FetchEnv(robot_env.RobotEnv):
             goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(-self.target_range, self.target_range, size=3)
             goal += self.target_offset
             goal[2] = self.height_offset
+            #print(self.height_offset)
             if self.target_in_the_air and self.np_random.uniform() < 0.5:
                 goal[2] += self.np_random.uniform(0, 0.45)
         else:
             goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(-self.target_range, self.target_range, size=3)
+            goal[2] = 0.43
+            if self.target_in_the_air and self.np_random.uniform() < 0.5:
+                goal[2] += self.np_random.uniform(0, 2*self.target_range)
         return goal.copy()
 
     def _is_success(self, achieved_goal, desired_goal):
@@ -174,7 +201,8 @@ class FetchEnv(robot_env.RobotEnv):
         self.sim.forward()
 
         # Move end effector into position.
-        gripper_target = np.array([-0.498, 0.005, -0.431 + self.gripper_extra_height]) + self.sim.data.get_site_xpos('robot0:grip')
+        gripper_target = np.array([-0.498, 0.005, -0.431 + self.gripper_extra_height]) + self.sim.data.get_site_xpos(
+            'robot0:grip')
         gripper_rotation = np.array([1., 0., 1., 0.])
         self.sim.data.set_mocap_pos('robot0:mocap', gripper_target)
         self.sim.data.set_mocap_quat('robot0:mocap', gripper_rotation)
