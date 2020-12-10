@@ -3,10 +3,24 @@ import numpy as np
 
 env = gym.make("FetchReach-v1")
 for i in range(100):
-    env.reset(target_in_the_air=True, target_range=0.05, distance_threshold=0.15)
-    for _ in range(100):
+    print("---------------------------------------- New Env Set ")
+    env.reset(target_in_the_air=True, target_range=0.05, distance_threshold=.2)
+    next_obs = None
+    done = False
+    reward_sum = 0
+    while not done:
+        obs = next_obs
+        action = env.action_space.sample()
         env.render()
-        env.step(env.action_space.sample())
+        next_obs, reward, done, info = env.step(action)
+        reward_sum += reward
+        if done:
+            print(action, reward, done)
+            print(info)
+            print("===================================================== Total reward", reward_sum)
+            print()
+            break
+
 env.close()
 
 '''
