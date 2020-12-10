@@ -58,7 +58,8 @@ class FetchEnv(robot_env.RobotEnv):
         else:
             return -d
 
-    # RobotEnv methods
+            # RobotEnv methods
+
     # ----------------------------
 
     def _step_callback(self):
@@ -145,8 +146,8 @@ class FetchEnv(robot_env.RobotEnv):
         if 'has_object' in to_tweak:
             self.has_object = to_tweak['has_object']
         if 'target_in_the_air' in to_tweak:
-            print("it worked")
-            print(to_tweak)
+            # print("it worked")
+            # print(to_tweak)
             self.target_in_the_air = to_tweak['target_in_the_air']
         if 'target_offset' in to_tweak:
             self.target_offset = to_tweak['target_offset']
@@ -158,7 +159,7 @@ class FetchEnv(robot_env.RobotEnv):
             self.distance_threshold = to_tweak['distance_threshold']
 
     def _reset_sim(self):
-        print(self.target_in_the_air)
+        # print(self.target_in_the_air)
         self.sim.set_state(self.initial_state)
 
         # Randomize start position of object.
@@ -180,14 +181,14 @@ class FetchEnv(robot_env.RobotEnv):
             goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(-self.target_range, self.target_range, size=3)
             goal += self.target_offset
             goal[2] = self.height_offset
-            #print(self.height_offset)
+            # print(self.height_offset)
             if self.target_in_the_air and self.np_random.uniform() < 0.5:
                 goal[2] += self.np_random.uniform(0, 0.45)
         else:
             goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(-self.target_range, self.target_range, size=3)
             goal[2] = 0.43
             if self.target_in_the_air and self.np_random.uniform() < 0.5:
-                goal[2] += self.np_random.uniform(0, 2*self.target_range)
+                goal[2] += self.np_random.uniform(0, 2 * self.target_range)
         return goal.copy()
 
     def _is_success(self, achieved_goal, desired_goal):

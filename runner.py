@@ -3,7 +3,7 @@ import numpy as np
 
 env = gym.make("FetchReach-v1")
 for i in range(100):
-    env.reset(target_in_the_air=True, target_range=0.05)
+    env.reset(target_in_the_air=True, target_range=0.05, distance_threshold=0.15)
     for _ in range(100):
         env.render()
         env.step(env.action_space.sample())
